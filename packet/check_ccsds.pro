@@ -34,7 +34,6 @@ function check_ccsds,data,pkt_def,header=header,length=length,pkt_idx=pkt_idx
   header=parse_pkt(data,0,pkt_def[0])
   if header.ver ne 0 then return,0
   if header.type ne 0 then return,0
-  if header.scnd_hdr ne 1 then return, 0
   apid=header.apid and '7ff'xu
   length=header.data_len
   w=where(apid eq pkt_def[*].apid,count)
