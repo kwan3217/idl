@@ -88,7 +88,13 @@ function rkto_packet_defs
                 {name:'T',       type:t_i16   ,pos:10,shift:0,length: 0,rep:0}, $
                 {name:'P',       type:t_i32   ,pos:12,shift:0,length: 0,rep:0}]), $
               decomp:ptr_new(), enum:ptr_new()}
-  packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,MPU_desc,bmp_desc]
+
+  sd_desc={name:"SD Timing",apid:'8'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                *(sec_pkt_desc.fields), $
+                {name:'TC1',     type:t_u32   ,pos:10,shift:0,length: 0,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,MPU_desc,bmp_desc,sd_desc]
           
   return,packets
 end
