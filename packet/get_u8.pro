@@ -10,12 +10,12 @@
 ;  This code depends on the byte array holding big-endian encoded data, but
 ;  does not depend on the endian-ness of the machine running this code.
 function get_u8,data,idx,shift,length
-  result=byte(data[idx+0])
+  result=data[idx+0]
   if n_elements(shift) gt 0 then begin
     result=ishft(result,-shift)    
   end
   if n_elements(length) gt 0 then begin
     result=result and (ishft(1,length)-1)
   end
-  return,result
+  return,byte(result)
 end
