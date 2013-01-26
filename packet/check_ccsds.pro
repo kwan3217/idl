@@ -24,7 +24,7 @@
 ;  the length in the CCSDS primary header does not match the length in
 ;  the packet definition table, then the packet is neither valid nor
 ;  recognized.
-function check_ccsds,data,pkt_def,header=header,length=length,pkt_idx=pkt_idx
+function check_ccsds,data,pkt_def,header=header,length=length,pkt_idx=pkt_idx,need_sec=need_sec,need_grp=need_grp
   t_u8=1
   t_u16=12
   length=-1 ;If we return early, we are totally out of sync, don't know how 
@@ -34,6 +34,8 @@ function check_ccsds,data,pkt_def,header=header,length=length,pkt_idx=pkt_idx
   header=parse_pkt(data,0,pkt_def[0])
   if header.ver ne 0 then return,0
   if header.type ne 0 then return,0
+  if n_elements(need_sec) gt 0 then if header.scnd_hdr ne need_sec then return, 0
+  if n_elements(need_grp) gt 0 then if header.grp_flg ne need_grp then return, 0
   apid=header.apid and '7ff'xu
   length=header.data_len
   w=where(apid eq pkt_def[*].apid,count)

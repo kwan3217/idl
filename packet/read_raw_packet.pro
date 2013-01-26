@@ -6,7 +6,7 @@
 ;  pkt_def - array of packet definitions
 ;output - 
 
-function read_raw_packet,inf=inf,valid=valid,recognized=recognized,pkt_def,skip=skip,status=status
+function read_raw_packet,inf=inf,valid=valid,recognized=recognized,pkt_def,skip=skip,status=status,need_sec=need_sec,need_grp=need_grp
   ;Read CCSDS header
   valid=0
   recognized=0
@@ -18,7 +18,7 @@ function read_raw_packet,inf=inf,valid=valid,recognized=recognized,pkt_def,skip=
   end
   ;Don't bother if there's nothing to read
   if ~status then return,{apid:0}
-  valid=check_ccsds(header,pkt_def,pkt_idx=pkt_idx,length=length,header=header_decom)
+  valid=check_ccsds(header,pkt_def,pkt_idx=pkt_idx,length=length,header=header_decom,need_sec=need_sec,need_grp=need_grp)
   if n_elements(skip) eq 0 then skip=0
   while ~valid do begin
     skip++
@@ -29,7 +29,7 @@ function read_raw_packet,inf=inf,valid=valid,recognized=recognized,pkt_def,skip=
     end
   if ~status then return,{apid:0}
     header=[header[1:n_elements(header)-1],this_header]
-    valid=check_ccsds(header,pkt_def,pkt_idx=pkt_idx,length=length,header=header_decom)
+    valid=check_ccsds(header,pkt_def,pkt_idx=pkt_idx,length=length,header=header_decom,need_sec=need_sec,need_grp=need_grp)
   end
   if n_elements(inf) gt 0 then begin
     status=read_raw_bytes(inf,length+1,body)
