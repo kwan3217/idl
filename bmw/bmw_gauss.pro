@@ -18,7 +18,7 @@ function FindZLo,A,r1,r2
   Y=1d;
   Zlo=-1d;
 
-  while (Y>0) do begin
+  while (Y gt 0) do begin
     Zlo*=2d;
     Y=r1+r2-A*(1-Zlo*bmw_SS(Zlo))/sqrt(bmw_CC(Zlo));
   end
@@ -40,7 +40,7 @@ function FindZLo2,A,r1,r2,T
   ;Find the Z which results in a TTrial of less than T
   Z=-1;
   TTrial=FindTTrial(A,r1,r2,Z)-T;
-  while (TTrial>0) do begin
+  while (TTrial gt 0) do begin
     Z*=2;
     TTrial=FindTTrial(A,r1,r2,Z)-T;
   end
@@ -90,7 +90,7 @@ pro bmw_gauss,rv1_,rv2_,t_,type_,l_DU=l_DU,mu=mu,eps=eps,vv1=vv1,vv2=vv2
   if Revs gt 0 then begin
     minA=r1/2d
     minT=Revs*sqrt(tau*minA^3)
-    if (minT>T) then message,"Can't do it! Minimum trip time for "+string(Revs)+" revs is "+string(minT)+"TU, more than requested "+string(T)+"TU"
+    if (minT gt T) then message,"Can't do it! Minimum trip time for "+string(Revs)+" revs is "+string(minT)+"TU, more than requested "+string(T)+"TU"
   end
   A=DM*sqrt(r1*r2*(1+cos(DeltaNu)))
   if(Revs lt 1) then begin
@@ -98,7 +98,7 @@ pro bmw_gauss,rv1_,rv2_,t_,type_,l_DU=l_DU,mu=mu,eps=eps,vv1=vv1,vv2=vv2
     if Type eq 1 then begin
       Zlo=FindZLo(A,r1,r2);
     end else begin
-      Zlo=FindZLo2(A,r1l,r2l,T);
+      Zlo=FindZLo2(A,r1,r2,T);
     end
     Zhi=tau^2;
   end else begin
@@ -113,7 +113,7 @@ pro bmw_gauss,rv1_,rv2_,t_,type_,l_DU=l_DU,mu=mu,eps=eps,vv1=vv1,vv2=vv2
     end
     Zhi=(Zbound+Zlo)/2d; //Z that gives the highest TIME, not necessarily highest Z
     repeat begin
-      Thi=FindTTrial(A,r1l,r2l,Zhi);
+      Thi=FindTTrial(A,r1,r2,Zhi);
       Zhi=(Zbound+Zhi)/2; //Split the difference between current Zhi and bound
     end until Thi ge T
   end
