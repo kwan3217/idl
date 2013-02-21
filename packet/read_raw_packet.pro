@@ -36,7 +36,11 @@ function read_raw_packet,inf=inf,valid=valid,recognized=recognized,pkt_def,skip=
   end else begin
     status=read_bytes(length+1,body)
   end
-  if status eq 0 then message,"read_bytes of body didn't work"
+  if status eq 0 then begin
+    message,/info,"read_bytes of body didn't work"
+    valid=0
+    return,{apid:0}
+  end
   if(pkt_idx) ge 0 then begin
     recognized=1
     packet=[header,body]

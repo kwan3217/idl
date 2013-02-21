@@ -1,7 +1,10 @@
 function get_data,data,idx,type,shift,length,rep
   if n_elements(length) gt 0 && length lt 0 then begin
     l=n_elements(data)-idx
-    return,swap_endian(/swap_if_little,fix(data,type=type,idx,l/type_length(type)))
+    if type eq 7 then ttype=1 else ttype=type
+    result=swap_endian(/swap_if_little,fix(data,type=ttype,idx,l/type_length(type)))
+    if(type eq 7) then result=string(result)
+    return,result
   end else begin
     if ~keyword_set(rep) or n_elements(idx) ne 1 then rep=1
     if type eq 1 then begin

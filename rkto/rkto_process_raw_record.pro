@@ -23,7 +23,12 @@ pro rkto_process_raw_record,f
           adx[n_packets[pkt.apid]-1]=pkt
         end
         2:help,pkt,/str
-        3:if n_elements(dumpdata) eq 0 then dumpdata=pkt.data else dumpdata=[dumpdata,pkt.data]
+        3:begin
+          if n_elements(dumpdata) eq 0 then dumpdata=[0b]
+          n_extend=pkt.address+n_elements(pkt.data)-n_elements(dumpdata)
+          if n_extend gt 0 then dumpdata=[dumpdata,bytarr(n_extend)]
+          dumpdata[pkt.address:pkt.address+n_elements(pkt.data)-1]=pkt.data
+        end
         4:begin
           if n_elements(hmc) eq 0 then hmc=pkt
           while n_elements(hmc) le n_packets[pkt.apid] do hmc=[hmc,hmc]
@@ -49,6 +54,16 @@ pro rkto_process_raw_record,f
           while n_elements(tcc) le n_packets[pkt.apid] do tcc=[tcc,tcc]
           tcc[n_packets[pkt.apid]-1]=pkt
         end
+        10:begin
+          if n_elements(bmp2) eq 0 then bmp2=pkt
+          while n_elements(bmp2) le n_packets[pkt.apid] do bmp2=[bmp2,bmp2]
+          bmp2[n_packets[pkt.apid]-1]=pkt
+        end
+        11:begin
+          if n_elements(ad377) eq 0 then ad377=pkt
+          while n_elements(ad377) le n_packets[pkt.apid] do ad377=[ad377,ad377]
+          ad377[n_packets[pkt.apid]-1]=pkt
+        end
         else:help,pkt,/str
       end
     end
@@ -61,5 +76,10 @@ pro rkto_process_raw_record,f
   if n_packets[6] gt 0 then mpu=mpu[0:n_packets[6]-1]
   if n_packets[7] gt 0 then bmp=bmp[0:n_packets[7]-1]
   if n_packets[8] gt 0 then tcc=tcc[0:n_packets[8]-1]
+  if n_elements(dumpdata) gt 0 then begin
+    openw,/get_lun,ouf,f+'.tar.zpaq'
+    writeu,ouf,dumpdata
+    free_lun,ouf
+  end
   stop
 end

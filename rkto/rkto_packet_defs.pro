@@ -6,6 +6,7 @@ function rkto_packet_defs
   t_i32=3
   t_u16=12
   t_u32=13
+  t_str=7
   t_float=4
   t_double=5
   REST=-2
@@ -94,7 +95,43 @@ function rkto_packet_defs
                 *(sec_pkt_desc.fields), $
                 {name:'TC1',     type:t_u32   ,pos:10,shift:0,length: 0,rep:0}]), $
               decomp:ptr_new(), enum:ptr_new()}
-  packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,MPU_desc,bmp_desc,sd_desc]
+  bmp2_desc={name:"BMP180 raw and processed readout",apid:'a'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                *(sec_pkt_desc.fields), $
+                {name:'Traw',       type:t_i16   ,pos:10,shift:0,length: 0,rep:0}, $
+                {name:'Praw',       type:t_i32   ,pos:12,shift:0,length: 0,rep:0}, $
+                {name:'Tphy',       type:t_i16   ,pos:16,shift:0,length: 0,rep:0}, $
+                {name:'Pphy',       type:t_i32   ,pos:18,shift:0,length: 0,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  ad377_desc={name:"AD377 raw readout",apid:'b'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                *(sec_pkt_desc.fields), $
+                {name:'data',       type:t_i16   ,pos:10,shift:0,length:REST,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  ver_desc={name:"Version",apid:'c'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                {name:'HW_TYPE',       type:t_u32  ,pos: 6,shift:0,length: 0,rep:0}, $
+                {name:'HW_SERIAL',     type:t_u32  ,pos:10,shift:0,length: 0,rep:0}, $
+                {name:'MAMCR',         type:t_u8   ,pos:14,shift:0,length: 0,rep:0}, $
+                {name:'MAMTIM',        type:t_u8   ,pos:15,shift:0,length: 0,rep:0}, $
+                {name:'PLL0STAT',      type:t_u16  ,pos:16,shift:0,length: 0,rep:0}, $
+                {name:'VPBDIV',        type:t_u8   ,pos:18,shift:0,length: 0,rep:0}, $
+                {name:'FOSC',          type:t_u32  ,pos:19,shift:0,length: 0,rep:0}, $
+                {name:'CCLK',          type:t_u32  ,pos:23,shift:0,length: 0,rep:0}, $
+                {name:'PCLK',          type:t_u32  ,pos:27,shift:0,length: 0,rep:0}, $
+                {name:'PREINT',        type:t_u32  ,pos:31,shift:0,length: 0,rep:0}, $
+                {name:'PREFRAC',       type:t_u32  ,pos:35,shift:0,length: 0,rep:0}, $
+                {name:'CCR',           type:t_u8   ,pos:39,shift:0,length: 0,rep:0}, $
+                {name:'VERSION',       type:t_str  ,pos:40,shift:0,length:REST,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  ad7991_desc={name:"AD7991 setup",apid:'d'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                {name:'Address',       type:t_u8   ,pos:6,shift:0,length: 0,rep:0}, $
+                {name:'channel_mask',       type:t_u8   ,pos:7,shift:0,length: 0,rep:0}, $
+                {name:'n_channels',       type:t_u8   ,pos:8,shift:0,length: 0,rep:0}, $
+                {name:'worked',       type:t_u8   ,pos:9,shift:0,length: 0,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,MPU_desc,bmp_desc,sd_desc,ad377_desc,bmp2_desc,ver_desc,ad7991_desc]
           
   return,packets
 end
