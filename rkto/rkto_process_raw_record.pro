@@ -1,9 +1,5 @@
 ;Input: 
 ; f - filename of raw record file to process
-; lin= - optional. If set, this is the path to a cstol script with linear 
-;        binning commands, to be used to set up the linear binning table
-; non= - optional. If set, path to a folder containing cstol scripts of 
-;        the form [spat|spec]%02d.prc defining the nonlinear binning table
 pro rkto_process_raw_record,f
   openr,inf,f,/get_lun
   status=1
@@ -75,7 +71,9 @@ pro rkto_process_raw_record,f
   if n_packets[5] gt 0 then l3g=l3g[0:n_packets[5]-1]
   if n_packets[6] gt 0 then mpu=mpu[0:n_packets[6]-1]
   if n_packets[7] gt 0 then bmp=bmp[0:n_packets[7]-1]
+  if n_packets[10] gt 0 then bmp2=bmp2[0:n_packets[10]-1]
   if n_packets[8] gt 0 then tcc=tcc[0:n_packets[8]-1]
+  if n_packets[11] gt 0 then ad377=ad377[0:n_packets[11]-1]
   if n_elements(dumpdata) gt 0 then begin
     openw,/get_lun,ouf,f+'.tar.zpaq'
     writeu,ouf,dumpdata

@@ -10,6 +10,9 @@ function get_data,data,idx,type,shift,length,rep
     if type eq 1 then begin
       if rep gt 1 then idx=idx+indgen(rep)*1
       return,get_u8(data,idx,shift,length)
+    end else if type eq 7 then begin
+      if rep gt 1 then idx=idx+indgen(rep)*1
+      return,string(get_u8(data,idx,shift,length))
     end else if type eq 2 then begin
       if rep gt 1 then idx=idx+indgen(rep)*2
       return,get_i16(data,idx)
