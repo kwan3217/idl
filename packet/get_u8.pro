@@ -12,10 +12,10 @@
 function get_u8,data,idx,shift,length
   result=data[idx+0]
   if n_elements(shift) gt 0 then begin
-    result=ishft(result,-shift)    
+    result/=2^shift    
   end
   if n_elements(length) gt 0 then begin
-    result=result and (ishft(1,length)-1)
+    result=result and (2^length-1)
   end
   return,byte(result)
 end

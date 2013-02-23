@@ -7,7 +7,7 @@ end
 
 pro stuff_field,result,field,value
   if field.length gt 0 then value=value and (2UL^(field.length)-1)
-  if field.shift gt 0 then value=ishft(value,field.shift)
+  if field.shift gt 0 then value*=2UL^field.shift
   value=swap_endian(/swap_if_little,fix(type=field.type,value)) ;coerce to correct type (in case ruined by length or shift) then swap endian
   value=byte(value,0,type_length(field.type))
   stuff_array,result,field,value
