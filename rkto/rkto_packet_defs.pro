@@ -158,7 +158,45 @@ function rkto_packet_defs
                 {name:'RDY',      type:t_u8   ,pos:9,shift:0,length: 1,rep:0}, $
                 {name:'ID',      type:t_str   ,pos:10,shift:0,length: 0,rep:3}]), $
               decomp:ptr_new(), enum:ptr_new()}
-  packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,MPU_desc,bmp_desc,sd_desc,ad377_desc,bmp2_desc,ver_desc,ad7991_desc,hmc5883_desc]
+  mpu60x0_cfg={name:"MPU60x0 configuration",apid:'f'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                {name:'ADDRESS',       type:t_u8   ,pos: 6,shift:0,length: 0,rep:0}, $
+                {name:'XA_TEST_HI',    type:t_u8   ,pos: 7,shift:5,length: 3,rep:0}, $
+                {name:'XG_TEST',       type:t_u8   ,pos: 7,shift:0,length: 5,rep:0}, $
+                {name:'YA_TEST_HI',    type:t_u8   ,pos: 8,shift:5,length: 3,rep:0}, $
+                {name:'YG_TEST',       type:t_u8   ,pos: 8,shift:0,length: 5,rep:0}, $
+                {name:'ZA_TEST_HI',    type:t_u8   ,pos: 9,shift:5,length: 3,rep:0}, $
+                {name:'ZG_TEST',       type:t_u8   ,pos: 9,shift:0,length: 5,rep:0}, $
+                {name:'XA_TEST_LO',    type:t_u8   ,pos:10,shift:4,length: 2,rep:0}, $
+                {name:'YA_TEST_LO',    type:t_u8   ,pos:10,shift:2,length: 2,rep:0}, $
+                {name:'ZA_TEST_LO',    type:t_u8   ,pos:10,shift:0,length: 2,rep:0}, $
+                {name:'SMPLRT_DIV',    type:t_u8   ,pos:11,shift:0,length: 0,rep:0}, $
+                {name:'EXT_SYNC_SET',  type:t_u8   ,pos:12,shift:3,length: 3,rep:0}, $
+                {name:'DLPF_CFG',      type:t_u8   ,pos:12,shift:0,length: 3,rep:0}, $
+                {name:'XG_ST',         type:t_u8   ,pos:13,shift:7,length: 1,rep:0}, $
+                {name:'YG_ST',         type:t_u8   ,pos:13,shift:6,length: 1,rep:0}, $
+                {name:'ZG_ST',         type:t_u8   ,pos:13,shift:5,length: 1,rep:0}, $
+                {name:'GYRO_FS_SEL',   type:t_u8   ,pos:13,shift:3,length: 2,rep:0}, $
+                {name:'XA_ST',         type:t_u8   ,pos:14,shift:7,length: 1,rep:0}, $
+                {name:'YA_ST',         type:t_u8   ,pos:14,shift:6,length: 1,rep:0}, $
+                {name:'ZA_ST',         type:t_u8   ,pos:14,shift:5,length: 1,rep:0}, $
+                {name:'ACC_FS_SEL',    type:t_u8   ,pos:14,shift:3,length: 2,rep:0}, $
+                {name:'MOT_THR',       type:t_u8   ,pos:15,shift:0,length: 0,rep:0}, $
+                {name:'INT_LEVEL',     type:t_u8   ,pos:16,shift:7,length: 1,rep:0}, $
+                {name:'INT_OPEN',      type:t_u8   ,pos:16,shift:6,length: 1,rep:0}, $
+                {name:'LATCH_INT_EN',  type:t_u8   ,pos:16,shift:5,length: 1,rep:0}, $
+                {name:'INT_RD_CLEAR',  type:t_u8   ,pos:16,shift:4,length: 1,rep:0}, $
+                {name:'FSYNC_INT_LVL', type:t_u8   ,pos:16,shift:3,length: 1,rep:0}, $
+                {name:'FSYNC_INT_EN',  type:t_u8   ,pos:16,shift:2,length: 1,rep:0}, $
+                {name:'I2C_BYP_EN',    type:t_u8   ,pos:16,shift:1,length: 1,rep:0}, $
+                {name:'DEV_RESET',     type:t_u8   ,pos:18,shift:7,length: 1,rep:0}, $
+                {name:'SLEEP',         type:t_u8   ,pos:18,shift:6,length: 1,rep:0}, $
+                {name:'CYCLE',         type:t_u8   ,pos:18,shift:5,length: 1,rep:0}, $
+                {name:'TEMP_DIS',      type:t_u8   ,pos:18,shift:3,length: 1,rep:0}, $
+                {name:'CLKSEL',        type:t_u8   ,pos:18,shift:0,length: 3,rep:0}, $
+                {name:'WHOAMI',        type:t_u8   ,pos:19,shift:0,length: 0,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,MPU_desc,bmp_desc,sd_desc,ad377_desc,bmp2_desc,ver_desc,ad7991_desc,hmc5883_desc,mpu60x0_cfg]
           
   return,packets
 end
