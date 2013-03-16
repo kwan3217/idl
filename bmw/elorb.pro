@@ -1,4 +1,25 @@
-function elorb,r_,v_,l_DU,mu
+;Given state vector, calculate orbital elements
+;input
+;  r - position vector, may be a grid of vectors, in distance units implied by mu, any inertial frame is fine, but center of attraction is assumed to be
+;      at the origin of the frame
+;  v - inertial velocity vector, must follow r as either not a grid or a grid of the same size, distance and time units implied by mu
+;      must be in same frame as r
+;  l_du - length of a distance unit, used for conversion to canonical units internally
+;  mu - gravity parameter, implies distance and time units
+;output
+;  ev= eccentricity vector. Follows grid-ness of r. Length is equal to eccentricity, points from center of attraction to periapse
+;return
+;  a structure, fields of which are either scalar or grids depending on grid-ness of r
+;    p:  semi-parameter, distance from focus to orbit at TA=+-90deg, in original distance units, always positive for any eccentricity
+;    a:  semimajor axis, in original distance units
+;    e:  eccentricity
+;    i:  inclination, radians
+;    an: longitude of ascending node, angle between x axis and line of intersection between orbit plane and xy plane, radians
+;    ap: argument of periapse, angle between xy plane and periapse along orbit plane, radians
+;    ta: true anomaly, angle between periapse and object, radians
+;    tp: time to next periapse original time units. Negative if only one periapse and in the past
+;    rp: radius of periapse in original distance units
+function elorb,r_,v_,l_DU,mu,ev=ev
   tau=2d*!dpi ;Tau manifesto
   rv=su_to_cu(r_,l_DU,mu,1,0)
   vv=su_to_cu(v_,l_DU,mu,1,-1)
@@ -13,8 +34,13 @@ function elorb,r_,v_,l_DU,mu
   e=vlength(ev)
   
   xi=v^2/2d -1/r
-  a=dblarr(size(xi,/dim))
-  p=dblarr(size(xi,/dim))
+  if n_elements(xi) eq 1 then begin
+    a=0d
+    p=0d
+  end else begin
+    a=dblarr(size(xi,/dim))
+    p=dblarr(size(xi,/dim))
+  end
   w=where(e ne 1.0,count)
   if count gt 0 then begin
     a[w]=-1/(2*xi[w])
@@ -39,10 +65,16 @@ function elorb,r_,v_,l_DU,mu
   ta=vangle(ev,rv)
   w=where(dotp(rv,vv) lt 0,count)
   if count gt 0 then ta[w]=tau-ta[w]
-  rp=dblarr(size(a,/dim))
-  n=dblarr(size(a,/dim))
+  if n_elements(a) eq 1 then begin
+    rp=0d
+    n=0d
+    MM=0d
+  end else begin
+    rp=dblarr(size(a,/dim))
+    n=dblarr(size(a,/dim))
+    MM=dblarr(size(a,/dim))
+  end
   w=where(a gt 0,count)
-  MM=dblarr(size(a,/dim))
   if count gt 0 then begin
     EE=2*atan(sqrt((1d -e[w])/(1d +e[w])*tan(ta[w]/2d)))
     MM[w]=EE-e[w]*sin(EE)
@@ -64,9 +96,13 @@ function elorb,r_,v_,l_DU,mu
     rp[w]=p[w]/2
   end
   tp=MM/n
-  return,{p:su_to_cu(p,l_du,mu,1,0,/inv), $
-          a:su_to_cu(a,l_du,mu,1,0,/inv), $
-          e:e,i:i,an:an,ap:ap,ta:ta, $
+  return,{p:su_to_cu(p,l_du,mu,1,0,/inv),   $
+          a:su_to_cu(a,l_du,mu,1,0,/inv),   $
+          e:e,                              $
+          i:i,                              $
+          an:an,                            $
+          ap:ap,                            $
+          ta:ta,                            $
           tp:su_to_cu(tp,l_du,mu,0,1,/inv), $
           rp:su_to_cu(rp,l_du,mu,1,0,/inv)  $
           }
