@@ -3,6 +3,7 @@
 	<name>rkto</name>
 	<comment></comment>
 	<projects>
+		<project>packet</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

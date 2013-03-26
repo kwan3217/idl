@@ -150,7 +150,7 @@ function rkto_packet_defs
   hmc5883_desc={name:"HMC5883 configuration",apid:'e'xu,length:0U,fields:ptr_new([ $
                 *(header_pkt_desc.fields), $
                 {name:'MA',       type:t_u8   ,pos:6,shift:5,length: 2,rep:0}, $
-                {name:'DO',       type:t_u8   ,pos:6,shift:2,length: 3,rep:0}, $
+                {name:'DO_',       type:t_u8   ,pos:6,shift:2,length: 3,rep:0}, $
                 {name:'MS',       type:t_u8   ,pos:6,shift:0,length: 2,rep:0}, $
                 {name:'GN',       type:t_u8   ,pos:7,shift:5,length: 3,rep:0}, $
                 {name:'MD',       type:t_u8   ,pos:8,shift:0,length: 2,rep:0}, $
