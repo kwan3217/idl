@@ -15,12 +15,12 @@ end
 pro integrate_msl
   tic
   tau=2d*!dpi ; tau manifesto
-  t0='2011 NOV 25 17:00:00 TDB'
+  t0='2011 NOV 26 17:00:00 TDB'
   t1='2012 AUG 06 5:18:58.537 TDB'
   t_tcm1='2011 DEC 10 18:00:00 TDB'
   dlm_register,'C:\Users\jeppesen\IDLWorkspace80\icy\lib\icy.dlm'
-  cspice_furnsh,'generic.tf'
-  cspice_furnsh,'msl.tf'
+  cspice_furnsh,'generic.tm'
+  cspice_furnsh,'msl.tm'
   cspice_str2et,t0,et0
   cspice_str2et,t1,et1
   cspice_str2et,t_tcm1,et_tcm1  
@@ -34,7 +34,7 @@ pro integrate_msl
   cspice_gdpool,'AU',0,1,au,found
   au=au[0]
 
-  dt=10d
+  dt=300d
   t=dindgen((et1-et0)/dt)*dt+et0
   i_tcm1=min(where(t gt et_tcm1))
   ;Entire MSL trajectory at dt interval
@@ -88,7 +88,7 @@ pro integrate_msl
   y1=fp[*,3+1]-a_grav[*,1]
   
   plot,[0,0],xrange=[-3d8,3d8],yrange=[-3d8,3d8],/iso
-  for i=0,n_elements(x0)-1,50000 do begin
+  for i=0,n_elements(x0)-1,500000/dt do begin
     oplot,[x0[i],x0[i]+3d19*x1[i]],[y0[i],y0[i]+3d19*y1[i]]
   end
   
