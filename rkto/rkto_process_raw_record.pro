@@ -60,6 +60,11 @@ pro rkto_process_raw_record,f
           while n_elements(ad377) le n_packets[pkt.apid] do ad377=[ad377,ad377]
           ad377[n_packets[pkt.apid]-1]=pkt
         end
+        16:begin
+          if n_elements(fast) eq 0 then fast=pkt
+          while n_elements(fast) le n_packets[pkt.apid] do fast=[fast,fast]
+          fast[n_packets[pkt.apid]-1]=pkt
+        end
         else:help,pkt,/str
       end
     end
@@ -74,6 +79,7 @@ pro rkto_process_raw_record,f
   if n_packets[10] gt 0 then bmp2=bmp2[0:n_packets[10]-1]
   if n_packets[8] gt 0 then tcc=tcc[0:n_packets[8]-1]
   if n_packets[11] gt 0 then ad377=ad377[0:n_packets[11]-1]
+  if n_packets[16] gt 0 then fast=fast[0:n_packets[16]-1]
   if n_elements(dumpdata) gt 0 then begin
     openw,/get_lun,ouf,f+'.tar.zpaq'
     writeu,ouf,dumpdata
