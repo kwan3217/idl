@@ -20,10 +20,7 @@ pro rkto_process_raw_record,f
         end
         2:help,pkt,/str
         3:begin
-          if n_elements(dumpdata) eq 0 then dumpdata=[0b]
-          n_extend=pkt.address+n_elements(pkt.data)-n_elements(dumpdata)
-          if n_extend gt 0 then dumpdata=[dumpdata,bytarr(n_extend)]
-          dumpdata[pkt.address:pkt.address+n_elements(pkt.data)-1]=pkt.data
+          if n_elements(dumpdata) eq 0 then dumpdata=pkt.data else dumpdata=[dumpdata,pkt.data]
         end
         4:begin
           if n_elements(hmc) eq 0 then hmc=pkt
