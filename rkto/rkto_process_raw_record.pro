@@ -1,16 +1,17 @@
 ;Input: 
 ; f - filename of raw record file to process
 pro rkto_process_raw_record,f
+  tic
   openr,inf,f,/get_lun
   status=1
   def=rkto_packet_defs()
   n_packets=ulonarr(2048)
   t_packets=0UL
   while status do begin
-    pkt=read_raw_packet(inf=inf,def,skip=0,status=status)
+    pkt=read_raw_packet(inf=inf,def,skip=0,status=status,/need_apid)
     if status eq 1 then begin
       t_packets+=1
-      if(t_packets mod 1000 eq 0) then print,t_packets
+      if(t_packets mod 1000 eq 0) then toc,string(t_packets)
       n_packets[pkt.apid]=n_packets[pkt.apid]+1
       case pkt.apid of
         1:begin
@@ -85,5 +86,6 @@ pro rkto_process_raw_record,f
     writeu,ouf,dumpdata
     free_lun,ouf
   end
+  toc
   stop
 end
