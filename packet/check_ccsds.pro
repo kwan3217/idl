@@ -40,7 +40,10 @@ function check_ccsds,data,pkt_def,header=header,length=length,pkt_idx=pkt_idx,ne
   length=header.data_len
   w=where(apid eq pkt_def[*].apid,count)
   if count eq 1 then begin
-;    if length ne pkt_def[w].length then return,0
+    if pkt_def[w].length ne 0 and length ne pkt_def[w].length then begin
+      message,/info,string(format='(%"Packet length doesn''t match (apid %03x, expected %d, was %d)")',apid,pkt_def[w].length,length)
+      return,0
+    end
     pkt_idx=w
   end
   return,1

@@ -10,12 +10,12 @@
 ;  This code depends on the byte array holding big-endian encoded data, but
 ;  does not depend on the endian-ness of the machine running this code.
 function get_u16,data,idx,shift,length
-  result=UINT(data[idx+0]*2^8)+UINT(data[idx+1])
+  result=ishft(UINT(data[idx+0]),8*1)+ishft(UINT(data[idx+1]),8*0)
   if n_elements(shift) gt 0 then begin
-    result/=2^shift
+    result=ishft(result,-shift)
   end
   if n_elements(length) gt 0 then begin
-    result=result and (2^length-1)
+    result=result and (ishft(1,length)-1)
   end
   return,result
 end
