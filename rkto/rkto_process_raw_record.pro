@@ -23,6 +23,9 @@ pro rkto_process_raw_record,f
         3:begin
           if n_elements(dumpdata) eq 0 then dumpdata=pkt.data else dumpdata=[dumpdata,pkt.data]
         end
+        17:begin
+          if n_elements(sddata) eq 0 then sddata=pkt.rec else sddata=[sddata,pkt.rec]
+        end
         4:begin
           if n_elements(hmc) eq 0 then hmc=pkt
           while n_elements(hmc) le n_packets[pkt.apid] do hmc=[hmc,hmc]
@@ -67,6 +70,7 @@ pro rkto_process_raw_record,f
       end
     end
   end
+  help,fstat(inf),/str
   close,inf
   free_lun,inf
   if n_packets[1] gt 0 then adx=adx[0:n_packets[1]-1]

@@ -200,9 +200,13 @@ function rkto_packet_defs
                 {name:'hw',     type:t_u16   ,pos:30,shift: 0,length:12,rep:0}, $
                 {name:'tc1',    type:t_u32   ,pos:32,shift: 0,length: 0,rep:0}]), $
               decomp:ptr_new(), enum:ptr_new()}
+  sd={name:"SD usage pattern",apid:'11'xu,length:0U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                {name:'rec',    type:t_u32   ,pos:6,shift: 0,length: REST,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
   packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,   $
            MPU_desc,bmp_desc,sd_desc,ad377_desc,bmp2_desc,ver_desc,ad7991_desc, $
-           hmc5883_desc,mpu60x0_cfg,fastpkt]
+           hmc5883_desc,mpu60x0_cfg,fastpkt,sd]
           
   return,packets
 end
