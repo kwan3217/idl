@@ -76,7 +76,7 @@ function elorb,r_,v_,l_DU,mu,ev=ev
   end
   w=where(a gt 0,count)
   if count gt 0 then begin
-    EE=2*atan(sqrt((1d -e[w])/(1d +e[w])*tan(ta[w]/2d)))
+    EE=2*atan(sqrt((1d -e[w])/(1d +e[w]))*tan(ta[w]/2d))
     MM[w]=EE-e[w]*sin(EE)
     n[w]=sqrt(1d/(a[w]^3))
     rp[w]=a[w]*(1d -e)
@@ -95,7 +95,7 @@ function elorb,r_,v_,l_DU,mu,ev=ev
     n[w]=sqrt(2d/(p[w]^3))
     rp[w]=p[w]/2
   end
-  tp=MM/n
+  tp=-MM/n
   return,{p:su_to_cu(p,l_du,mu,1,0,/inv),   $
           a:su_to_cu(a,l_du,mu,1,0,/inv),   $
           e:e,                              $
@@ -104,6 +104,9 @@ function elorb,r_,v_,l_DU,mu,ev=ev
           ap:ap,                            $
           ta:ta,                            $
           tp:su_to_cu(tp,l_du,mu,0,1,/inv), $
-          rp:su_to_cu(rp,l_du,mu,1,0,/inv)  $
+          rp:su_to_cu(rp,l_du,mu,1,0,/inv),  $
+          MM:MM, $
+          n:su_to_cu(n,l_du,mu,0,-1,/inv), $
+          t:su_to_cu(2*!dpi*sqrt(a^3),l_du,mu,0,1,/inv) $
           }
 end
