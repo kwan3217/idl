@@ -11,7 +11,10 @@ pro rkto_process_raw_record,f
     pkt=read_raw_packet(inf=inf,def,skip=0,status=status,/need_apid)
     if status eq 1 then begin
       t_packets+=1
-      if(t_packets mod 1000 eq 0) then toc,string(t_packets)
+      if(t_packets mod 1000 eq 0) then begin
+        toc,string(t_packets)
+        if t_packets mod 100000 eq 0 then stop
+      end
       n_packets[pkt.apid]=n_packets[pkt.apid]+1
       case pkt.apid of
         1:begin
