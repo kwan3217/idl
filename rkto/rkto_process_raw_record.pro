@@ -8,12 +8,14 @@ pro rkto_process_raw_record,f
   n_packets=ulonarr(2048)
   t_packets=0UL
   while status do begin
-    pkt=read_raw_packet(inf=inf,def,skip=0,status=status,/need_apid)
+    skip=0
+    pkt=read_raw_packet(inf=inf,def,skip=skip,status=status,need_grp=3)
+ ;   help,pkt,/str
     if status eq 1 then begin
       t_packets+=1
-      if(t_packets mod 1000 eq 0) then begin
+      if(t_packets mod 100000 eq 0) then begin
         toc,string(t_packets)
-        if t_packets mod 100000 eq 0 then stop
+;        if t_packets mod 100000 eq 0 then stop
       end
       n_packets[pkt.apid]=n_packets[pkt.apid]+1
       case pkt.apid of
@@ -69,7 +71,10 @@ pro rkto_process_raw_record,f
           while n_elements(fast) le n_packets[pkt.apid] do fast=[fast,fast]
           fast[n_packets[pkt.apid]-1]=pkt
         end
-        else:help,pkt,/str
+        else:begin
+          help,pkt,/str
+;          stop
+        end
       end
     end
   end

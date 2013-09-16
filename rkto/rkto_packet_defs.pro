@@ -6,6 +6,7 @@ function rkto_packet_defs
   t_i32=3
   t_u16=12
   t_u32=13
+  t_u64=15
   t_str=7
   t_float=4
   t_double=5
@@ -204,9 +205,36 @@ function rkto_packet_defs
                 *(header_pkt_desc.fields), $
                 {name:'rec',    type:t_u32   ,pos:6,shift: 0,length: REST,rep:0}]), $
               decomp:ptr_new(), enum:ptr_new()}
+  sdinfo={name:"SD Card Information",apid:'12'xu,length:28U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                {name:'manufacturer',    type:t_u8   ,pos: 6,shift: 0,length: 0,rep:0}, $
+                {name:'oem',             type:t_str  ,pos: 7,shift: 0,length: 0,rep:3}, $
+                {name:'product',         type:t_str  ,pos:10,shift: 0,length: 0,rep:6}, $
+                {name:'revision',        type:t_u8   ,pos:16,shift: 0,length: 0,rep:0}, $
+                {name:'serial',          type:t_u32  ,pos:17,shift: 0,length: 0,rep:0}, $
+                {name:'mfg_year',        type:t_u8   ,pos:21,shift: 0,length: 0,rep:0}, $
+                {name:'mfg_month',       type:t_u8   ,pos:22,shift: 0,length: 0,rep:0}, $
+                {name:'capacity',        type:t_u64  ,pos:23,shift: 0,length: 0,rep:0}, $
+                {name:'flag_copy',       type:t_u8   ,pos:31,shift: 0,length:12,rep:0}, $
+                {name:'flag_wp',         type:t_u8   ,pos:32,shift:12,length: 2,rep:0}, $
+                {name:'flag_format',     type:t_u8   ,pos:33,shift: 0,length:12,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  vertical={name:"Vertical",apid:'14'xu,length:12U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                *(sec_pkt_desc.fields), $
+                {name:'wasVert',    type:t_u8   ,pos: 10,shift: 0,length: 0,rep:0}, $
+                {name:'uptime',     type:t_u32  ,pos: 11,shift: 0,length: 0,rep:0}, $
+                {name:'timeout',    type:t_u32  ,pos: 15,shift: 0,length: 0,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
+  vbus={name:"VBus switch",apid:'13'xu,length:5U,fields:ptr_new([ $
+                *(header_pkt_desc.fields), $
+                *(sec_pkt_desc.fields), $
+                {name:'old_vbus',    type:t_u8   ,pos: 10,shift: 0,length: 0,rep:0}, $
+                {name:'new_vbus',    type:t_u8   ,pos: 11,shift: 0,length: 0,rep:0}]), $
+              decomp:ptr_new(), enum:ptr_new()}
   packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,   $
            MPU_desc,bmp_desc,sd_desc,ad377_desc,bmp2_desc,ver_desc,ad7991_desc, $
-           hmc5883_desc,mpu60x0_cfg,fastpkt,sd]
+           hmc5883_desc,mpu60x0_cfg,fastpkt,sd,sdinfo,vertical,vbus]
           
   return,packets
 end

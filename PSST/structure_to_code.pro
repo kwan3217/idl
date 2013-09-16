@@ -29,8 +29,32 @@ function array_to_code,a,indent=indent
       1: result+=string(format='(%"%dB")',a[j])
       2: result+=string(format='(%"%d")',a[j])
       3: result+=string(format='(%"%dL")',a[j])
-      4: result+=string(format='(%"%14.7e")',a[j])
-      5: result+=string(format='(%"%50.20fd")',a[j])
+      4:begin
+        if finite(a[j],/nan,/sign) then begin
+          result+='!values.f_nan'
+        end else if finite(a[j],/nan,/sign) then begin
+          result+='-!values.f_nan'
+        end else if finite(a[j],/inf,/sign) then begin
+          result+='!values.f_infinity'
+        end else if finite(a[j],/inf,/sign) then begin
+          result+='-!values.f_infinity'
+        end else begin
+          result+=string(format='(%"%14.7e")',a[j])
+        end
+      end 
+      5: begin
+        if finite(a[j],/nan,/sign) then begin
+          result+='!values.d_nan'
+        end else if finite(a[j],/nan,/sign) then begin
+          result+='-!values.d_nan'
+        end else if finite(a[j],/inf,/sign) then begin
+          result+='!values.d_infinity'
+        end else if finite(a[j],/inf,/sign) then begin
+          result+='-!values.d_infinity'
+        end else begin
+          result+=string(format='(%"%50.20fd")',a[j])
+        end
+      end
       7: result+=string(format='(%"''%s''")',a[j])
       8: result+=structure_to_code(a[j],indent=indent+2)
       12:result+=string(format='(%"%dU")',a[j])
