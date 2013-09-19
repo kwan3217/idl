@@ -81,7 +81,7 @@ end
 pro kv_example
 
   ;timestamps of measurement
-  max_t=100d ;Measurements cover 10 time units
+  max_t=1000d ;Measurements cover 10 time units
   n_meas=1000 ;This many measurements
   t=dindgen(n_meas)*double(max_t)/double(n_meas) ;measurements are equally spaced
 
@@ -111,9 +111,9 @@ pro kv_example
     v_yrange=A*tau/TT*[-2,2]                            
   end else begin
     ;Create simulated true measurement, EVE flare
-    t0=50 ;Flare start time
-    flare_a=10 ;Flare time constants
-    flare_b=20
+    t0=500 ;Flare start time
+    flare_a=50 ;Flare time constants
+    flare_b=100
     xp=Ofs+A*flare(flare_a,flare_b,t-t0,ddt=xv,/norm)
     xv*=A
     p_yrange=[0,50]
@@ -126,6 +126,13 @@ pro kv_example
 
   ;Create measurements by adding noise to true state
   z=xp+v
+  ;print,string(format='(%"UPDATE `header` SET `t`=''2001-01-01 00:00:00'',`x0`=%22.15e,`x1`=0,`P00`=1,`P11`=1,`P01`=0 WHERE id=4;")',z[0])
+  ;print,"INSERT INTO `Measurements` (`header`, `t`, `z`) VALUES"
+  ;for i=0,n_elements(z)-1 do begin
+  ;  m=fix(t[i]/60);
+  ;  s=t[i]-m*60;
+  ;  print,string(format='(%"(4,''2000-01-01 00:%02d:%02d'',%22.15e)%s")',m,s,z[i],i eq n_elements(z)-1?";":",")
+  ;end
 
   ;In real life, you will have timestamps t and measurements z, but no x or v
   ; == End simulation ==

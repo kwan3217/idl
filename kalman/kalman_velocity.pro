@@ -14,7 +14,7 @@
 ;      lag of LL measurements. Zero (pure Kalman filter) by default.
 ; xh0 (Optional) - Two-element array, a priori (initial guess) of process state. 
 ;     First element is estimate of initial position, second is of initial velocity.
-;     [0d,0d] by default.
+;     [z[0],0d] by default.
 ; P0 (Optional) - Two-by-two matrix, a priori covariance of process state. 
 ;    [1,0]
 ;    [0,1] by default.
