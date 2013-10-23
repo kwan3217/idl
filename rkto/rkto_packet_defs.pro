@@ -232,6 +232,10 @@ function rkto_packet_defs
                 {name:'old_vbus',    type:t_u8   ,pos: 10,shift: 0,length: 0,rep:0}, $
                 {name:'new_vbus',    type:t_u8   ,pos: 11,shift: 0,length: 0,rep:0}]), $
               decomp:ptr_new(), enum:ptr_new()}
+  ovr={name:"Packet buffer overflow",apid:'15'xu,length:7U,fields:ptr_new([ $              
+                *(header_pkt_desc.fields), $
+                *(sec_pkt_desc.fields), $
+                {name:'new_ovr',    type:t_u32   ,pos: 10,shift: 0,length: 0,rep:0}), $
   packets=[header_pkt_desc,adxl_desc,bmpcal_desc,dump_desc,hmc_desc,L3G_desc,   $
            MPU_desc,bmp_desc,sd_desc,ad377_desc,bmp2_desc,ver_desc,ad7991_desc, $
            hmc5883_desc,mpu60x0_cfg,fastpkt,sd,sdinfo,vertical,vbus]
