@@ -19,7 +19,7 @@ pro ellipsoid_fit,x_,y_,z_,center=center,radii=radii,evecs=evecs,pars=pars
 ;% Output:
 ;% * center    -  ellispoid center coordinates [xc; yc; zc]
 ;% * ax        -  ellipsoid radii [a; b; c]
-;% * evecs     -  ellipsoid radii directions as columns of the 3x3 matrix
+;% * evecs     -  ellipsoid radii directions as columns of the 3x3 matrix - returns a 2D array in the form of unit column vectors
 ;% * v         -  the 9 parameters describing the ellipsoid algebraically: 
 ;%                Ax^2 + By^2 + Cz^2 + 2Dxy + 2Exz + 2Fyz + 2Gx + 2Hy + 2Iz = 1
 ;%
@@ -72,7 +72,7 @@ v = invert( vleft ) ## vright;
     ; solve the eigenproblem
     ;[ evecs evals ] = eig( R( 1:3, 1:3 ) / -R( 4, 4 ) );
     evals=real_part(la_eigenproblem(-R[0:2,0:2]/R[3,3],eigenvectors=evecs))
-    evecs=real_part(evecs)
+    evecs=transpose(real_part(evecs))
     radii = sqrt( 1.0 /  evals  );
 
 
