@@ -26,8 +26,10 @@ function ell_dist,lat1_,lon1_,lat2_,lon2_,a=a_,b=b_,h=h,ell_az=az,rad=rad
     end
     return,result_dist
   end
-  if n_elements(a_) eq 0 then a=get_wgs84_const(/re) else a=a_
-  if n_elements(b_) eq 0 then b=get_wgs84_const(/rp) else b=b_
+;  if n_elements(a_) eq 0 then a=get_wgs84_const(/re) else a=a_
+;  if n_elements(b_) eq 0 then b=get_wgs84_const(/rp) else b=b_
+a=a_
+b=b_
   if n_elements(h) ne 0 then begin
     a+=h
     b+=h
