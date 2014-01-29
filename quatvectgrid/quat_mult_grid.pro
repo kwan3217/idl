@@ -28,17 +28,17 @@ endif
 ;
 ; Multiply Quaternions
 ;
-if size(q1,/n_dimensions) eq 1 then begin
-  q=quat_mult(q2,q1) ;Bring quaternion multiplication back into conformity with convention
-end else begin
-  resolve_grid,q1,x=Ax,y=Ay,z=Az,w=A0,/has_w
-  resolve_grid,q2,x=Bx,y=By,z=Bz,w=B0,/has_w
+;if size(q1,/n_dimensions) eq 1 then begin
+;  q=quat_mult(q2,q1) ;Bring quaternion multiplication back into conformity with convention
+;end else begin
+  resolve_grid,q1,x=Ax,y=Ay,z=Az,w=A0
+  resolve_grid,q2,x=Bx,y=By,z=Bz,w=B0
   C0=A0*B0-Ax*Bx-Ay*By-Az*Bz
   Cx=A0*Bx+Ax*B0+Ay*Bz-Az*By
   Cy=A0*By-Ax*Bz+Ay*B0+Az*Bx
   Cz=A0*Bz+Ax*By-Ay*Bx+Az*B0
   q=compose_grid(Cx,Cy,Cz,C0)
-end
+;end
 ;
 ; Done
 ;

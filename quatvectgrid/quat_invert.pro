@@ -30,7 +30,7 @@ endif
 ;
 ; Invert quaternion
 ;
-resolve_grid,q,x=x,y=y,z=z,w=w,/has_w
+resolve_grid,q,x=x,y=y,z=z,w=w
 q_inverse=compose_grid(-x,-y,-z,w)
 ;
 ; Done

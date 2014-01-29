@@ -1,12 +1,32 @@
+function twobody,rv
+  mu=398600436233000.00d  
+  return,-mu*rv/(vlength(rv)^3)
+end
+
+function j2grav,rv
+  mu=398600436233000d  
+  J2=0.001082616d 
+  re=6378136.6d  
+  
+  r=vlength(rv)
+  resolve_grid,rv,x=x,y=y,z=z
+  coef=-3d*J2*mu*re^2d/(2d*r^5d)
+  ax=coef*x*(1d -5d*z^2d/r^2d)
+  ay=coef*y*(1d -5d*z^2d/r^2d)
+  az=coef*z*(3d -5d*z^2d/r^2d)
+  return,compose_grid(ax,ay,az)
+end
+
+function grav,rv
+  return,twobody(rv)+j2grav(rv)
+end
+
 function ntohl,data,i
   return,ulong(uint(data[i,*]))*65536+uint(data[i+1,*])
 end
-pro import_fast
+pro integrate_fast
+  defsysv,'!tau',2.0d*!dpi ; Tau manifesto, Tau is especially convenient for converting to radians
   t0=2019.0; Range Zero - TC converted into seconds but counted from timer startup. First data point which sees dynamic acceleration is first point after this time
-  data=read_binary('ouf013.sds',data_t=2,endian='big')
-  datapower=reform(data,5,n_elements(data)/5)
-  seqpower=ntohl(datapower,0)
-  tcpower=fix_tc(/sec,ntohl(datapower,2))-t0
   swindow,0
   device,dec=1
   data=read_binary('ouf010.sds',data_t=2,endian='big')
@@ -46,7 +66,7 @@ pro import_fast
   dnrange=32768.0
   ;Numerator is number of roll rotations measured on the way up before despin measured by the compass, denominator is same measured
   ;by gyroscope. The rest is the nameplate rotation sensitivity
-  phygrange=2000.0*(218.0/216.25)/360.0;rev/sec
+  phygrange=2000.0*(218.0/216.25)/360.0*!tau;rad/sec
   dngrange=32768.0
   ;Rocket was floating throug space at an acceleration indistinguishable from zero G during this range time
   t0g=[130,470]
@@ -91,7 +111,8 @@ pro import_fast
   mgzf=linfit(mt[w0g],mgz[w0g],yfit=yfit) & print,"mgz || ",mgzf[0],"||",mgzf[1],"||",stdev(mgz[w0g]),"||",stdev(yfit-mgz[w0g]),"||",1-(stdev(yfit-mgz[w0g])/stdev(mgz[w0g]))
 ;  plot,mt[w0g],mgz[w0g],psym=3,/ynoz,charsize=2,xtitle='Temperature DN',ytitle='Z rotation rate DN'
 ;  oplot,mt[w0g],yfit,color='0000ff'x
-  
+
+  save,maxf,mayf,mazf,mgxf,mgyf,mgzf,file='../flight36.290/poly.sav' 
   ;Use the constant coefficient to subtract off the sensor zero-g bias. We will do the linear as well, just because it's there. Scale the 
   ;measurements to physical units based on phyrange
   ;_M_PU6050 _A_cceleration _X_ axis _P_hysical units (m/s^2)
@@ -100,164 +121,135 @@ pro import_fast
   mayp= (may-poly(mt,mayf))*phyrange/dnrange
   ;_M_PU6050 _A_cceleration _Z_ axis _P_hysical units (m/s^2)
   mazp= (maz-poly(mt,mazf))*phyrange/dnrange
-  ;_M_PU6050 _G_yroscope _X_ axis _P_hysical units (rev/s)
+  ;_M_PU6050 _G_yroscope _X_ axis _P_hysical units (rad/s)
   mgxp= (mgx-poly(mt,mgxf))*phygrange/dngrange
-  ;_M_PU6050 _G_yroscope _Y_ axis _P_hysical units (rev/s)
+  ;_M_PU6050 _G_yroscope _Y_ axis _P_hysical units (rad/s)
   mgyp= (mgy-poly(mt,mgyf))*phygrange/dngrange
-  ;_M_PU6050 _G_yroscope _Z_ axis _P_hysical units (rev/s)
+  ;_M_PU6050 _G_yroscope _Z_ axis _P_hysical units (rad/s)
   mgzp= (mgz-poly(mt,mgzf))*phygrange/dngrange
+
   matp=sqrt(maxp^2+mayp^2+mazp^2)
   mgtp=sqrt(mgxp^2+mgyp^2+mgzp^2)
   ;Plot rotation rate around each axis and total in rev/s
   print,"Nameplate sensitivity in rev/s: ",2000.0/360.0
+  print,"Nameplate sensitivity in rad/s: ",2000.0/360.0*!tau
   !p.multi=0
-  xrange=[0,1000]
-  plot,tcm, mgtp,xrange=xrange,yrange=[-phygrange,phygrange],xtitle='Range time s',ytitle='Rotation rate rev/sec',/ys
+  xrange=[76,81]
+  xrange_fullspin=[60,70]
+  w=where(tcm ge 60 and tcm lt 70,count)
+  print,"Mean full-spin speed (rad/s): ",mean(mgtp[w])
+  plot,tcm, mgtp,xrange=xrange,yrange=[-phygrange,phygrange],xtitle='Range time s',ytitle='Rotation rate rev/sec',/ys,/xs
   oplot,tcm,mgxp,color='0000ff'x
   oplot,tcm,mgyp,color='00ff00'x
   oplot,tcm,mgzp,color='ff0000'x
+  plot,tcm, matp,xrange=xrange,yrange=[-20,20],xtitle='Range time s',ytitle='Acceleration m/s^2',/ys,/xs
+  oplot,tcm,maxp,color='0000ff'x
+  oplot,tcm,mayp,color='00ff00'x
+  oplot,tcm,mazp,color='ff0000'x
   ;_H_ighacc _X_ _P_hysical (m/s^2)  
   hxp=(hx-hxm)*phyrangeh/dnrangeh
   ;_H_ighacc _Y_ _P_hysical (m/s^2)  
   hyp=(hy-hym)*phyrangeh/dnrangeh
   ;_H_ighacc _Z_ _P_hysical (m/s^2)  
   hzp=(hz-hzm)*phyrangeh/dnrangeh
-  
-  
-  ;Integrate velocity and position traveled along Z axis (rocket nose-to-tail axis) using derived physical calibration and
-  ;simple 1G subtraction - Variables are named 1s because originally it was just during the first 1 second of flight
-  ;_W_here _1s_ - Time from launch to +78s, encompassing spinup via fins through spindown via yoyo, but before 
-  ;stabilization by ACS and rotation to sun-point
-  w1s=where(tcm gt -1 and tcm lt 78)
-  ;_w_here for _m_ean on ground
-  wm=where(tcm gt -5 and tcm lt 0)
-  ;_M_PU6050 _A_cceleration _Z_ axis _M_ean on ground in DN
-  mazm_onground=mean(maz[wm])
-  ;_M_PU6050 _A_cceleration _Z_ axis during boost up to spindown (m/s^2) - calculated by subtracting mean before-launch
-  ;Z acceleration in DN from data during boost, then converting to physical units 
-  maz_1s=-(maz[w1s]-mazm_onground)*phyrange/dnrange
-  ;_T_ime _C_ount of _M_PU6050 data during boost
-  tcm_1s=tcm[w1s]
-  ;_d_ifferential of TCM_1s
-  dtcm_1s=tcm_1s-shift(tcm_1s,1)
-  plot,tcm_1s[1:-1],dtcm_1s[1:-1],/ynoz,charsize=2,yrange=[0,0.005]
-  dtcm_1s[0]=dtcm_1s[1]   ;Just use the first delta as the delta for the whole series
-  
-  ;Numerical integrate using trapezoidal rule to get speed from acceleration
-  ;_d_ifferential _M_PU6050 _A_cceleration _Z_ axis during boost
-  dmaz_1s=maz_1s+shift(maz_1s,1)
-  dmaz_1s[0]=0
-  mvz_1s=0.5*total(/c,dtcm_1s*dmaz_1s)
-  plot,tcm_1s,mvz_1s,xrange=[0,1],xtitle='Range time s',ytitle='Z spd m/s'
-  
-  ;Numerical integrate using trapezoidal rule to get distance from speed
-  ;_d_ifferential _M_PU6050 _R_vector _Z_ axis during boost
-  dmvz_1s=mvz_1s+shift(mvz_1s,1)
-  dmvz_1s[0]=0
-  mrz_1s=0.5*total(/c,dtcm_1s*dmvz_1s)
-  plot,tcm_1s,mrz_1s,xrange=[-0.1,0.1],xtitle='Range time s',ytitle='Z dist m'
-  
-  ;Plot of timestep, verify that fast recording was used throughout flight
-  dtc=tcm-shift(tcm,1)
-  dtc[0]=dtc[1]
-  plot,tcm,dtc*1000,yrange=[0,50],xtitle='Range time s',ytitle='Measurement time step, ms',/xs,/ys
-  
-  ;Plot of total HighAcc acceleration
-  plot,tcm,sqrt(hxp^2+hyp^2+hzp^2),xrange=[0,100],xtitle='Range time s',ytitle='Total highacc, m/s^2',/xs,/ys
-
-
-  ;Integrate rotation rate
-  mgz_1s=mgzp[w1s]
-  dmgz_1s=mgz_1s+shift(mgz_1s,1)
-  mvzg_1s=0.5*total(/c,dtcm_1s*dmgz_1s)
-  plot,tcm_1s,mvzg_1s,xrange=[0,78]
-  
-  data=read_binary('ouf00a.sds',data_t=2,endian='big')
-  help,data
-  data=reform(data,12,n_elements(data)/12)
-  tcp=fix_tc(/sec,ntohl(data,2))-t0
-  traw=data[ 4,*]
-  praw=ntohl(data,5)
-  t=data[ 7,*]
-  p=ntohl(data,8)
-  plot,tcp,p,xrange=xrange
-  data=read_binary('ouf004.sds',data_t=2,endian='big')
-  help,data
-  data=reform(data,7,n_elements(data)/7)
-  tcb=fix_tc(/sec,ntohl(data,2))-t0
-  bx=data[ 4,*]
-  by=data[ 6,*]
-  bz=data[ 5,*]
-  hrange=[0,575]
-  h2range=[600,900]
-  whrange=where(tcb gt hrange[0] and tcb lt hrange[1])
-  wh2range=where(tcb gt h2range[0] and tcb lt h2range[1])
-  plot,tcb,bx,xrange=hrange,/xs,yrange=[min([bx,by,bz]),max([bx,by,bz])],psym=3
-  oplot,tcb,bx,color='0000ff'x,psym=3
-  oplot,tcb,by,color='00ff00'x,psym=3
-  oplot,tcb,bz,color='ff0000'x,psym=3
-  ellipsoid_fit,bx[whrange],by[whrange],bz[whrange],center=center,radii=radii,evec=evec
-  ellipsoid_fit,bx[wh2range],by[wh2range],bz[wh2range],center=center2,radii=radii2,evec=evec2
-  hbx=center[0]
-  hby=center[1]
-  hbz=center[2]
-  bb=rebin(Radii,3,3)*evec
-  lat0=!dtor*32.417995
-  lon0=-106.32016*!dtor
+ 
+  ;initial conditions. Coordinate system is geocentric inertial system parallel to ECEF at t0, hereafter called GCI. After this time,
+  ;the launch site moves to the east in this coordinate system
+  lat0=!dtor*32.417995d
+  lon0=-106.32016d*!dtor
   alt0=1209
-  bsurf0=wmm2010([lat0,lon0,alt0],2013.8)
-  bsurf=sqrt(total(bsurf0^2)) ;need the field magnitude
-  aa=bb ## invert(evec) /bsurf
-  bdn=double([[transpose(bx)],[transpose(by)],[transpose(bz)]])
-  bp=invert(aa) ## (bdn-rebin(center,size(bdn,/dim)))
-  bxp=bp[*,0]
-  byp=bp[*,1]
-  bzp=bp[*,2]
-  !p.multi=[0,2,2]
-  plot,bp[whrange,0],bp[whrange,1],xrange=[-1,1]*bsurf,yrange=[-1,1]*bsurf,xtitle='x',ytitle='y',/iso,psym=3
-  plot,bp[whrange,0],bp[whrange,2],xrange=[-1,1]*bsurf,yrange=[-1,1]*bsurf,xtitle='x',ytitle='z',/iso,psym=3
-  plot,bp[whrange,1],bp[whrange,2],xrange=[-1,1]*bsurf,yrange=[-1,1]*bsurf,xtitle='y',ytitle='z',/iso,psym=3
-  !p.multi=0
-  swindow,1
-  device,dec=0
-  loadct,39
-  plot,bxp,byp,/iso,color=0,background=255,/nodata
-  xrange=[0,78]
-  wf=where(tcb gt xrange[0] and tcb lt xrange[1])
-  plots,bxp[wf],byp[wf],color=lindgen(n_elements(wf))*255L/n_elements(wf),psym=-1
-  
- ; how many times did we spin?
-  bxp_1s=bxp[wf]
-  byp_1s=byp[wf]
-  ;
-  w=where(bxp_1s gt 0 and byp_1s*shift(byp_1s,1) lt 0,count)
-  bxp_count=bxp_1s[w]
-  byp_count=byp_1s[w]
-  
-  plot,tcb[wf],bxp_1s gt 0, yrange=[-1,2]
-  oplot,tcb[wf],(byp_1s * shift(byp_1s,1))/abs(byp_1s * shift(byp_1s,1)),color=254
-  
-  ;initial conditions
-  el0=86.6*!dtor
-  az0=352*!dtor
+  el0=86.6d*!dtor
+  az0=352d*!dtor
   ;point the nose (p_b) at the sky (p_r), gravity vector (t_b) toward local vertical (t_r)
-  w=max(where(tcb lt 1.0))
-  t_b=normalize_grid(transpose(bp[w,*]))
+  ;zz - topocentric zenith vector at launch site at t0 in GCI, perpendicular to ellipsoid at launch site
   zz=[cos(lat0)*cos(lon0),cos(lat0)*sin(lon0),sin(lat0)]
+  ;_t_oward vector in _r_eference frame 
   t_r=zz
   w=max(where(tcm lt -1.0))
   t_b=normalize_grid([maxp[w],mayp[w],mazp[w]])
+  ;ee - topocentric east vector at launch site at t0 in GCI. In topocentric horizon plane, perpendicular to zz, pointing due east
   ee=normalize_grid(crossp_grid([0,0,1],zz))
+  ;nn - topocentric north vector at launch site at t0 in GCI. In topocentric horizon plane, perpendicular to zz, pointing due north
   nn=normalize_grid(crossp_grid(zz,ee))
+  ;_p_oint vector in _r_eference frame - from elevation and azimuth, but in GCI
   p_r=zz*sin(el0)+nn*cos(el0)*cos(az0)+ee*cos(el0)*sin(az0)
+  ;_p_oint vector in _b_ody rocketometer frame - presuming perfect mount, Z axis of rocketometer antiparallel to rocket roll axis
   p_b=[0,0,-1]
-  b_i=normalize_grid(bsurf0[0]*nn+bsurf0[1]*ee-bsurf0[2]*zz)
-  M=point_toward(p_r=transpose(p_r),p_b=transpose(p_b),t_r=transpose(t_r),t_b=transpose(t_b))
-  print,m
-  q=quat_to_mtx(/inv,m)
-  print,q
-  nose_i=M ## transpose([0,0,-1])
+  M_br=point_toward(p_r=transpose(p_r),p_b=transpose(p_b),t_r=transpose(t_r),t_b=transpose(t_b))
+  print,m_br
+  q0_br=quat_to_mtx(/inv,M_br)
+  print,q0_br
+  nose_i=M_br ## transpose([0,0,-1])
   print,"Elevation: ",asin(dotp(nose_i,zz))*!radeg
   print,"Azimuth:   ",atan(dotp(nose_i,ee),dotp(nose_i,nn))*!radeg
-  stop
+  nose_i=quat_vect_mult(quat_invert(q0_br),[0,0,-1])
+  print,"Elevation: ",asin(dotp(nose_i,zz))*!radeg
+  print,"Azimuth:   ",atan(dotp(nose_i,ee),dotp(nose_i,nn))*!radeg
+  
+  r0=lla_to_xyz(lat=lat0,lon=lon0,alt=alt0)
+  w0=!tau/86164.09d
+  v0=crossp_grid([0,0,w0],r0)
+  
+  ;Integrate rotation rate to get quaternions for each point in time after t0
+  dtcm=tcm-shift(tcm,1)
+  w=where(tcm gt 0 and tcm lt 1000,count)
+  dtcm=dtcm[w]
+  tcm=tcm[w]
+  mgxp=mgxp[w]
+  mgyp=mgyp[w]
+  mgzp=mgzp[w]
+  maxp=maxp[w]
+  mayp=mayp[w]
+  mazp=mazp[w]
+  map=compose_grid(maxp,mayp,mazp)
+  mgp=compose_grid(mgxp,mgyp,mgzp)
+  q_br=dblarr(count,4)
+  q_br[0,*]=q0_br
+  r=dblarr(count,3)
+  r[0,*]=r0
+  v=dblarr(count,3)
+  v[0,*]=v0
+  a_ng_i=r*0
+  a_i=r*0
+  openw,ouf,/get_lun,'NASA36_290.inc'
+  printf,ouf,format='(%"#declare State=array[%d][5] {")',count
+  printf,ouf,"//r_x                     r_y                      r_z                     t                         q_x                     q_y                     q_z                     q_w                       v_x                    v_y                      v_z                         a_x                      a_y                     a_z"
+  printf,ouf,format='(%"{<%23.15e,%23.15e,%23.15e,%23.15e>,<%23.15e,%23.15e,%23.15e,%23.15e>,<%23.15e,%23.15e,%23.15e,0>,<%23.15e,%23.15e,%23.15e,0>,<%23.15e,%23.15e,%23.15e,0>},")', $
+    r[0,*],tcm[0],q_br[0,*],v[0,*],a_i[0,*],a_ng_i[0,*]
+  for i=1,count-1 do begin
+    dqdt=0.5d*quat_mult(q_br[i-1,*],[transpose(mgp[i,*]),0])
+    q_br[i,*]=q_br[i-1,*]-dqdt*dtcm[i]
+    q_br[i,*]=quat_normalize(q_br[i,*])
+    a_ng_i[i,*]=quat_vect_mult(quat_invert(q_br[i,*]),map[i,*])
+    a_i[i,*]=a_ng_i[i,*]+grav(transpose(r[i-1,*]))
+    v[i,*]=v[i-1,*]+a_i[i,*]*dtcm[i]
+    r[i,*]=r[i-1,*]+v[i,*]*dtcm[i]
+    if i mod 10000 eq 0 then print,i,tcm[i]
+    printf,ouf,format='(%"{<%23.15e,%23.15e,%23.15e,%23.15e>,<%23.15e,%23.15e,%23.15e,%23.15e>,<%23.15e,%23.15e,%23.15e,0>,<%23.15e,%23.15e,%23.15e,0>,<%23.15e,%23.15e,%23.15e,0>},")', $
+    r[i,*],tcm[i],q_br[i,*],v[i,*],a_i[i,*],a_ng_i[i,*]
+  end
+  printf,ouf,"}"
+  free_lun,ouf
+  fps=30
+  openw,ouf,/get_lun,string(fps,format='(%"NASA36_290_%02dfps.inc")')
+  t_fps=dindgen((tcm[-1]-tcm[0])*30d)/30d
+  n_fps=n_elements(t_fps)
+  printf,ouf,format='(%"#declare State=array[%d][5] {")',n_fps
+  printf,ouf,"//r_x                     r_y                      r_z                     t                         q_x                     q_y                     q_z                     q_w                       v_x                    v_y                      v_z                         a_x                      a_y                     a_z"
+  r_fps=dblarr(n_fps,3)
+  for i=0,2 do r_fps[*,i]=interpol(r[*,i],tcm,t_fps)
+  v_fps=dblarr(n_fps,3)
+  for i=0,2 do v_fps[*,i]=interpol(v[*,i],tcm,t_fps)
+  a_fps=dblarr(n_fps,3)
+  for i=0,2 do a_fps[*,i]=interpol(a_i[*,i],tcm,t_fps)
+  a_ng_fps=dblarr(n_fps,3)
+  for i=0,2 do a_ng_fps[*,i]=interpol(a_ng_i[*,i],tcm,t_fps)
+  q_fps=dblarr(n_fps,4)
+  for i=0,3 do q_fps[*,i]=interpol(q_br[*,i],tcm,t_fps)
+  for i=0,n_fps-1 do begin
+    printf,ouf,format='(%"{<%23.15e,%23.15e,%23.15e,%23.15e>,<%23.15e,%23.15e,%23.15e,%23.15e>,<%23.15e,%23.15e,%23.15e,0>,<%23.15e,%23.15e,%23.15e,0>,<%23.15e,%23.15e,%23.15e,0>},")', $
+    r_fps[i,*],t_fps[i],q_fps[i,*],v_fps[i,*],a_fps[i,*],a_ng_fps[i,*]
+  end
+  printf,ouf,"}"
+  free_lun,ouf
 end
