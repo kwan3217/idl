@@ -27,8 +27,8 @@ end
 pro integrate_fast
   defsysv,'!tau',2.0d*!dpi ; Tau manifesto, Tau is especially convenient for converting to radians
   t0=2019.0; Range Zero - TC converted into seconds but counted from timer startup. First data point which sees dynamic acceleration is first point after this time
-  swindow,0
-  device,dec=1
+;  swindow,0
+;  device,dec=1
   data=read_binary('ouf010.sds',data_t=2,endian='big')
   help,data
   data=reform(data,17,n_elements(data)/17)
@@ -89,8 +89,8 @@ pro integrate_fast
   ;Fourth is stdev of all zero-g data
   ;Fifth is stdev of residual from linear fit
   ;Sixth is r^2 coefficient, fraction of stdev explained by fit
-  plot,tcm,mt
-  !p.multi=[0,3,2]
+;  plot,tcm,mt
+;  !p.multi=[0,3,2]
   maxf=linfit(mt[w0g],max[w0g],yfit=yfit) & print,"max || ",maxf[0],"||",maxf[1],"||",stdev(max[w0g]),"||",stdev(yfit-max[w0g]),"||",1-(stdev(yfit-max[w0g])/stdev(max[w0g]))
 ;  plot,mt[w0g],max[w0g],psym=3,/ynoz,charsize=2,xtitle='Temperature DN',ytitle='X acceleration DN'
 ;  oplot,mt[w0g],yfit,color='0000ff'x
@@ -138,14 +138,14 @@ pro integrate_fast
   xrange_fullspin=[60,70]
   w=where(tcm ge 60 and tcm lt 70,count)
   print,"Mean full-spin speed (rad/s): ",mean(mgtp[w])
-  plot,tcm, mgtp,xrange=xrange,yrange=[-phygrange,phygrange],xtitle='Range time s',ytitle='Rotation rate rev/sec',/ys,/xs
-  oplot,tcm,mgxp,color='0000ff'x
-  oplot,tcm,mgyp,color='00ff00'x
-  oplot,tcm,mgzp,color='ff0000'x
-  plot,tcm, matp,xrange=xrange,yrange=[-20,20],xtitle='Range time s',ytitle='Acceleration m/s^2',/ys,/xs
-  oplot,tcm,maxp,color='0000ff'x
-  oplot,tcm,mayp,color='00ff00'x
-  oplot,tcm,mazp,color='ff0000'x
+;  plot,tcm, mgtp,xrange=xrange,yrange=[-phygrange,phygrange],xtitle='Range time s',ytitle='Rotation rate rev/sec',/ys,/xs
+;  oplot,tcm,mgxp,color='0000ff'x
+;  oplot,tcm,mgyp,color='00ff00'x
+;  oplot,tcm,mgzp,color='ff0000'x
+;  plot,tcm, matp,xrange=xrange,yrange=[-20,20],xtitle='Range time s',ytitle='Acceleration m/s^2',/ys,/xs
+;  oplot,tcm,maxp,color='0000ff'x
+;  oplot,tcm,mayp,color='00ff00'x
+;  oplot,tcm,mazp,color='ff0000'x
   ;_H_ighacc _X_ _P_hysical (m/s^2)  
   hxp=(hx-hxm)*phyrangeh/dnrangeh
   ;_H_ighacc _Y_ _P_hysical (m/s^2)  

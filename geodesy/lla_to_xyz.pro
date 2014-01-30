@@ -1,4 +1,4 @@
-function lla_to_xyz,lat=phi,lon=lon,alt=h,a=a,flat=flat
+function lla_to_xyz,lat=phi,lon=lon,alt=h,re=a,flat=flat
   if n_elements(a) eq 0 then a=6378137d
   if n_elements(flat) eq 0 then flat=1/298.257223563d;
   b=a*(1d -flat)
