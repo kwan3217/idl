@@ -170,5 +170,6 @@ pro rail_fast
     r[i,*]=r[i-1,*]+v[i,*]*dtcm[i]
     if i mod 10000 eq 0 then print,i,tcm[i]
   end
+  ;downsample
   stop
 end
