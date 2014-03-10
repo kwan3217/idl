@@ -3,13 +3,13 @@ function ntohl,data,i
 end
 pro import_fast
   t0=2019.0; Range Zero - TC converted into seconds but counted from timer startup. First data point which sees dynamic acceleration is first point after this time
-  data=read_binary('ouf013.sds',data_t=2,endian='big')
-  datapower=reform(data,5,n_elements(data)/5)
-  seqpower=ntohl(datapower,0)
-  tcpower=fix_tc(/sec,ntohl(datapower,2))-t0
+;  data=read_binary('ouf013.sds',data_t=2,endian='big')
+;  datapower=reform(data,5,n_elements(data)/5)
+;  seqpower=ntohl(datapower,0)
+;  tcpower=fix_tc(/sec,ntohl(datapower,2))-t0
   swindow,0
   device,dec=1
-  data=read_binary('ouf010.sds',data_t=2,endian='big')
+  data=read_binary('RKTO0620_010_00.sds',data_t=2,endian='big')
   help,data
   data=reform(data,17,n_elements(data)/17)
   seq=ntohl(data,0)
@@ -35,6 +35,10 @@ pro import_fast
   hy=data[12,*] mod 4096
   ;_H_ighAcc _Z_ raw data
   hz=data[13,*] mod 4096
+;  openw,ouf,'RKTO0620_fast.csv',/get_lun
+;  printf,ouf,'    seq,           tc,   max,   may,   maz,   mgx,   mgy,   mgz,    mt,    hx,    hy,    hz'
+;  printf,ouf,format='(%"%7d,%13.7f,%6d,%6d,%6d,%6d,%6d,%6d,%6d,%6d,%6d,%6d")',transpose([[[double(seq)]],[[tcm]],[[max]],[[may]],[[maz]],[[mgx]],[[mgy]],[[mgz]],[[mt]],[[hx]],[[hy]],[[hz]]],[2,1,0])
+;  free_lun,ouf
   ;_T_ime _C_ount of the _M_PU6050 sensor readout finish
   tcm1=fix_tc(/sec,ntohl(data,14))-t0
   ;The numerator of the fraction is my best estimate of true measurable acceleration of gravity at launch site, in m/s^2, taking
@@ -172,22 +176,32 @@ pro import_fast
   mvzg_1s=0.5*total(/c,dtcm_1s*dmgz_1s)
   plot,tcm_1s,mvzg_1s,xrange=[0,78]
   
-  data=read_binary('ouf00a.sds',data_t=2,endian='big')
+  data=read_binary('RKTO0620_00a_00.sds',data_t=2,endian='big')
   help,data
   data=reform(data,12,n_elements(data)/12)
+  seq=ntohl(data,0)
   tcp=fix_tc(/sec,ntohl(data,2))-t0
   traw=data[ 4,*]
   praw=ntohl(data,5)
   t=data[ 7,*]
   p=ntohl(data,8)
   plot,tcp,p,xrange=xrange
-  data=read_binary('ouf004.sds',data_t=2,endian='big')
+;  openw,ouf,'RKTO0620_bmp.csv',/get_lun
+;  printf,ouf,'    seq,           tc, traw,  praw,   t,    p'
+;  printf,ouf,format='(%"%7d,%13.7f,%5d,%6d,%4.1f,%5d")',transpose([[[double(seq)]],[[tcp]],[[traw]],[[praw]],[[double(t)/10]],[[p]]],[2,1,0])
+;  free_lun,ouf
+  data=read_binary('RKTO0620_004_00.sds',data_t=2,endian='big')
   help,data
   data=reform(data,7,n_elements(data)/7)
+  seq=ntohl(data,0)
   tcb=fix_tc(/sec,ntohl(data,2))-t0
   bx=data[ 4,*]
   by=data[ 6,*]
   bz=data[ 5,*]
+  openw,ouf,'RKTO0620_hmc.csv',/get_lun
+  printf,ouf,'    seq,           tc,   bx,   by,   bz'
+  printf,ouf,format='(%"%7d,%13.7f,%5d,%5d,%5d")',transpose([[[double(seq)]],[[tcb]],[[bx]],[[by]],[[bz]]],[2,1,0])
+  free_lun,ouf
   hrange=[0,575]
   h2range=[600,900]
   whrange=where(tcb gt hrange[0] and tcb lt hrange[1])
