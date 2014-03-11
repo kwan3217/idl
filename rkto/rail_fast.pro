@@ -28,7 +28,8 @@ pro rail_fast
   defsysv,'!tau',2.0d*!dpi ; Tau manifesto, Tau is especially convenient for converting to radians
   swindow,0
   device,dec=1
-  data=read_binary('ouf010.sds',data_t=2,endian='big')
+  base_file='RKTO0600'
+  data=read_binary(base_file+'_010_00.sds',data_t=2,endian='big')
   help,data
   data=reform(data,17,n_elements(data)/17)
   seq=ntohl(data,0)
@@ -68,7 +69,7 @@ pro rail_fast
   phygrange=2000.0*(218.0/216.25)/360.0*!tau;rad/sec
   dngrange=32768.0
 
-  restore,'../flight36.290/poly.sav'
+  restore,'flight36.290/poly.sav'
   
   ;Use the constant coefficient to subtract off the sensor zero-g bias. We will do the linear as well, just because it's there. Scale the 
   ;measurements to physical units based on phyrange
@@ -91,7 +92,7 @@ pro rail_fast
   print,"Nameplate sensitivity in rev/s: ",2000.0/360.0
   print,"Nameplate sensitivity in rad/s: ",2000.0/360.0*!tau
   !p.multi=0
-  plot,tcm, mgtp,xrange=[10,20],yrange=[-12,12],xtitle='Range time s',ytitle='Acceleration m/s^2',/ys
+  plot,tcm, mgtp,yrange=[-12,12],xtitle='Range time s',ytitle='Acceleration m/s^2',/ys
   oplot,tcm,maxp,color='0000ff'x
   oplot,tcm,mayp,color='00ff00'x
   oplot,tcm,mazp,color='ff8080'x
