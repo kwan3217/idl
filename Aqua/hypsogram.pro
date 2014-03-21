@@ -1,8 +1,3 @@
-function linterp,x0,y0,x1,y1,x
-  t=(double(x)-double(x0))/(double(x1)-double(x0))
-  return,double(y0)*(1-t)+double(y1)*t
-end
-
 function hypsogram,d,locations=locations
   s=size(d,/dim)
   n_lat=s[1]
